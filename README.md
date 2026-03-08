@@ -33,7 +33,7 @@ Recommended for production:
 
 - `SECRET_KEY`
 - `COOKIE_SECURE=true`
-- `ALLOWED_HOSTS=your-app.up.railway.app,your-domain.com`
+- `ALLOWED_HOSTS=*.up.railway.app,your-domain.com`
 
 ## Local run
 
@@ -55,6 +55,8 @@ Run this after the app has started once, so tables exist:
 python -m scripts.create_user --buc-id BUC001 --password "strong-password" --display-name "Member One" --role admin --color "#f0f0f0"
 ```
 
+If you run the script from your local machine against Railway, use the public PostgreSQL connection string, not the internal `railway.internal` host.
+
 ## Railway
 
 Set these environment variables in Railway:
@@ -63,7 +65,7 @@ Set these environment variables in Railway:
 - `SECRET_KEY`
 - `COOKIE_SECURE=true`
 - `APP_ENV=production`
-- `ALLOWED_HOSTS=your-app.up.railway.app`
+- `ALLOWED_HOSTS=*.up.railway.app`
 
 Start command:
 
@@ -71,7 +73,7 @@ Start command:
 uvicorn app.main:app --host 0.0.0.0 --port $PORT
 ```
 
-Use a PostgreSQL plugin or a separate PostgreSQL service on Railway, then paste the connection string into `DATABASE_URL`.
+Use a PostgreSQL plugin or a separate PostgreSQL service on Railway, then paste the connection string into `DATABASE_URL`. The app will normalize Railway-style `postgres://` or `postgresql://` URLs automatically. For the deployed web service, Railway internal database URLs are fine. For running local admin scripts from your computer, use the public external PostgreSQL URL instead.
 
 ## Notes
 
