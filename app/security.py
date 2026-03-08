@@ -1,5 +1,5 @@
 from datetime import UTC, datetime, timedelta
-from secrets import token_urlsafe
+from uuid import uuid4
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
@@ -33,7 +33,7 @@ def build_session_expiry() -> datetime:
 
 def create_user_session(db: Session, user: User) -> UserSession:
     session = UserSession(
-        id=token_urlsafe(32),
+        id=str(uuid4()),
         user_id=user.id,
         expires_at=build_session_expiry(),
     )
