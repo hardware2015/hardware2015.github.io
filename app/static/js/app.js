@@ -16,6 +16,16 @@ const userMeta = document.querySelector("[data-user-meta]");
 let currentUser = initialState.user;
 let socket = null;
 let activePanel = null;
+let hasMoreMessages = Boolean(initialState.has_more_messages);
+let isLoadingHistory = false;
+
+function getOldestMessageId() {
+    const firstMessage = messagesContainer.firstElementChild;
+    if (!firstMessage) {
+        return null;
+    }
+    return Number(firstMessage.dataset.messageId);
+}
 
 function setStatus(element, text, isError = false) {
     element.textContent = text;
@@ -72,17 +82,11 @@ function createMessageCard(message) {
 
     const body = document.createElement("div");
     body.className = "message-body";
-
-    if (message.deleted_at) {
-        body.classList.add("message-deleted");
-        body.textContent = "message deleted";
-    } else {
-        body.textContent = message.body;
-    }
+    body.textContent = message.body;
 
     card.append(top, body);
 
-    if (currentUser && !message.deleted_at && (currentUser.role === "admin" || currentUser.id === message.user.id)) {
+    if (currentUser && (currentUser.role === "admin" || currentUser.id === message.user.id)) {
         const actions = document.createElement("div");
         actions.className = "message-actions";
 
@@ -107,6 +111,17 @@ function renderMessages(messages) {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
+function prependMessages(messages) {
+    const previousHeight = messagesContainer.scrollHeight;
+    const fragment = document.createDocumentFragment();
+    for (const message of messages) {
+        fragment.append(createMessageCard(message));
+    }
+    messagesContainer.prepend(fragment);
+    const nextHeight = messagesContainer.scrollHeight;
+    messagesContainer.scrollTop = nextHeight - previousHeight;
+}
+
 function upsertMessage(message) {
     const existing = messagesContainer.querySelector(`[data-message-id="${message.id}"]`);
     const nextNode = createMessageCard(message);
@@ -115,6 +130,53 @@ function upsertMessage(message) {
     } else {
         messagesContainer.append(nextNode);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+}
+
+function removeMessage(messageId) {
+    const existing = messagesContainer.querySelector(`[data-message-id="${messageId}"]`);
+    if (existing) {
+        existing.remove();
+    }
+}
+
+async function loadMessages(beforeId = null, preserveScroll = false) {
+    const query = beforeId ? `?before_id=${encodeURIComponent(beforeId)}` : "";
+    const response = await fetch(`/api/messages${query}`);
+    if (!response.ok) {
+        const payload = await response.json().catch(() => ({ detail: "Failed to load messages" }));
+        throw new Error(payload.detail || "Failed to load messages");
+    }
+    const payload = await response.json();
+    hasMoreMessages = Boolean(payload.has_more_messages);
+
+    if (preserveScroll) {
+        prependMessages(payload.messages);
+    } else {
+        renderMessages(payload.messages);
+    }
+}
+
+async function loadOlderMessages() {
+    if (!hasMoreMessages || isLoadingHistory) {
+        return;
+    }
+
+    const oldestMessageId = getOldestMessageId();
+    if (!oldestMessageId) {
+        return;
+    }
+
+    isLoadingHistory = true;
+    setStatus(chatStatus, "loading older messages...", false);
+
+    try {
+        await loadMessages(oldestMessageId, true);
+        setStatus(chatStatus, "", false);
+    } catch (error) {
+        setStatus(chatStatus, error.message || "Failed to load messages", true);
+    } finally {
+        isLoadingHistory = false;
     }
 }
 
@@ -167,8 +229,11 @@ function connectSocket() {
 
     socket.addEventListener("message", (event) => {
         const payload = JSON.parse(event.data);
-        if (payload.type === "message_created" || payload.type === "message_deleted") {
+        if (payload.type === "message_created") {
             upsertMessage(payload.message);
+        }
+        if (payload.type === "message_deleted") {
+            removeMessage(payload.message_id);
         }
         if (payload.type === "error") {
             setStatus(chatStatus, payload.detail || "error", true);
@@ -176,10 +241,17 @@ function connectSocket() {
     });
 }
 
-function activateChat(user) {
+async function activateChat(user, shouldLoadMessages = true) {
     currentUser = user;
     userMeta.textContent = `${user.display_name} / ${user.buc_id}`;
     transitionTo(chatPanel);
+    if (shouldLoadMessages) {
+        try {
+            await loadMessages();
+        } catch (error) {
+            setStatus(chatStatus, error.message || "Failed to load messages", true);
+        }
+    }
     connectSocket();
 }
 
@@ -195,7 +267,7 @@ loginForm.addEventListener("submit", async (event) => {
         const formData = new FormData(loginForm);
         const payload = await login(formData);
         setStatus(loginStatus, "", false);
-        activateChat(payload.user);
+        await activateChat(payload.user, true);
     } catch (error) {
         setStatus(loginStatus, error.message || "Login failed", true);
     }
@@ -221,9 +293,15 @@ messageForm.addEventListener("submit", (event) => {
     setStatus(chatStatus, "", false);
 });
 
+messagesContainer.addEventListener("scroll", () => {
+    if (messagesContainer.scrollTop <= 20) {
+        void loadOlderMessages();
+    }
+});
+
 if (initialState.authenticated && currentUser) {
     renderMessages(initialState.messages);
-    activateChat(currentUser);
+    void activateChat(currentUser, false);
 } else {
     heroPanel.classList.remove("hidden");
     heroPanel.classList.add("panel-visible");

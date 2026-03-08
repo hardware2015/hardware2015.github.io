@@ -20,6 +20,7 @@ from app.websocket_manager import manager
 
 settings = get_settings()
 limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
+MESSAGE_PAGE_SIZE = 50
 app = FastAPI(title=settings.app_name)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -57,9 +58,8 @@ async def security_headers(request: Request, call_next):
 def serialize_message(message: Message) -> dict:
     return {
         "id": message.id,
-        "body": None if message.deleted_at else message.body,
+        "body": message.body,
         "created_at": message.created_at.isoformat() if message.created_at else "",
-        "deleted_at": message.deleted_at.isoformat() if message.deleted_at else None,
         "user": {
             "id": message.user.id,
             "display_name": message.user.display_name,
@@ -68,6 +68,25 @@ def serialize_message(message: Message) -> dict:
         },
         "can_delete": False,
     }
+
+
+def query_recent_messages(db: Session, limit: int = MESSAGE_PAGE_SIZE) -> list[Message]:
+    return db.scalars(
+        select(Message)
+        .options(joinedload(Message.user))
+        .order_by(Message.created_at.desc(), Message.id.desc())
+        .limit(limit)
+    ).all()[::-1]
+
+
+def query_older_messages(db: Session, before_id: int, limit: int = MESSAGE_PAGE_SIZE) -> list[Message]:
+    return db.scalars(
+        select(Message)
+        .options(joinedload(Message.user))
+        .where(Message.id < before_id)
+        .order_by(Message.created_at.desc(), Message.id.desc())
+        .limit(limit)
+    ).all()[::-1]
 
 
 def build_page_state(user: User | None, messages: list[Message]) -> dict:
@@ -87,6 +106,7 @@ def build_page_state(user: User | None, messages: list[Message]) -> dict:
             "color": user.color,
         },
         "messages": serialized_messages,
+        "has_more_messages": len(messages) == MESSAGE_PAGE_SIZE,
     }
 
 
@@ -99,12 +119,7 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> User | 
 def index(request: Request, db: Session = Depends(get_db), current_user: User | None = Depends(get_current_user)):
     messages: list[Message] = []
     if current_user:
-        messages = db.scalars(
-            select(Message)
-            .options(joinedload(Message.user))
-            .order_by(Message.created_at.asc())
-            .limit(200)
-        ).all()
+        messages = query_recent_messages(db)
     state = build_page_state(current_user, messages)
     return templates.TemplateResponse(
         request=request,
@@ -119,6 +134,31 @@ def index(request: Request, db: Session = Depends(get_db), current_user: User | 
 @app.get("/health")
 def healthcheck() -> dict:
     return {"status": "ok"}
+
+
+@app.get("/api/messages")
+def get_messages(
+    request: Request,
+    before_id: int | None = None,
+    db: Session = Depends(get_db),
+    current_user: User | None = Depends(get_current_user),
+):
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+
+    messages = query_recent_messages(db) if before_id is None else query_older_messages(db, before_id)
+    oldest_id = messages[0].id if messages else before_id
+    has_more_messages = False
+    if oldest_id is not None:
+        has_more_messages = db.scalar(select(Message.id).where(Message.id < oldest_id).limit(1)) is not None
+
+    payload = []
+    for message in messages:
+        item = serialize_message(message)
+        item["can_delete"] = current_user.role == "admin" or message.user_id == current_user.id
+        payload.append(item)
+
+    return {"messages": payload, "has_more_messages": has_more_messages}
 
 
 @app.post("/api/login")
@@ -188,19 +228,14 @@ async def delete_message(
     message = db.scalar(select(Message).options(joinedload(Message.user)).where(Message.id == message_id))
     if not message:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Message not found")
-    if message.deleted_at:
-        return {"ok": True}
     if current_user.role != "admin" and message.user_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed")
 
-    message.deleted_at = datetime.now(UTC)
-    message.deleted_by_user_id = current_user.id
+    deleted_message_id = message.id
+    db.delete(message)
     db.commit()
-    db.refresh(message)
 
-    payload = serialize_message(message)
-    payload["can_delete"] = current_user.role == "admin" or message.user_id == current_user.id
-    await manager.broadcast({"type": "message_deleted", "message": payload})
+    await manager.broadcast({"type": "message_deleted", "message_id": deleted_message_id})
     return {"ok": True}
 
 
