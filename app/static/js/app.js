@@ -15,6 +15,7 @@ const userMeta = document.querySelector("[data-user-meta]");
 
 let currentUser = initialState.user;
 let socket = null;
+let activePanel = null;
 
 function setStatus(element, text, isError = false) {
     element.textContent = text;
@@ -22,21 +23,26 @@ function setStatus(element, text, isError = false) {
 }
 
 function transitionTo(nextPanel) {
-    for (const panel of [heroPanel, loginPanel, chatPanel]) {
-        if (!panel || panel === nextPanel) {
-            continue;
-        }
-        panel.classList.add("panel-leaving");
-        window.setTimeout(() => {
-            panel.classList.add("hidden");
-            panel.classList.remove("panel-leaving");
-        }, 240);
+    if (activePanel === nextPanel) {
+        return;
     }
 
     nextPanel.classList.remove("hidden");
-    nextPanel.classList.add("panel-leaving");
+
+    const previousPanel = activePanel;
+    activePanel = nextPanel;
+
+    if (previousPanel) {
+        previousPanel.classList.remove("panel-visible");
+        window.setTimeout(() => {
+            if (activePanel !== previousPanel) {
+                previousPanel.classList.add("hidden");
+            }
+        }, 220);
+    }
+
     requestAnimationFrame(() => {
-        nextPanel.classList.remove("panel-leaving");
+        nextPanel.classList.add("panel-visible");
     });
 }
 
@@ -219,5 +225,8 @@ if (initialState.authenticated && currentUser) {
     renderMessages(initialState.messages);
     activateChat(currentUser);
 } else {
+    heroPanel.classList.remove("hidden");
+    heroPanel.classList.add("panel-visible");
+    activePanel = heroPanel;
     renderMessages([]);
 }

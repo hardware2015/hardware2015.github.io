@@ -68,10 +68,28 @@ def delete_session(db: Session, session_id: str | None) -> None:
         db.commit()
 
 
+def get_expected_origin(host: str, scheme: str, forwarded_proto: str | None = None) -> str:
+    if forwarded_proto:
+        normalized_scheme = forwarded_proto.split(",", maxsplit=1)[0].strip()
+    elif scheme == "wss":
+        normalized_scheme = "https"
+    elif scheme == "ws":
+        normalized_scheme = "http"
+    else:
+        normalized_scheme = scheme
+    return f"{normalized_scheme}://{host}"
+
+
 def require_same_origin(request: Request) -> None:
     origin = request.headers.get("origin")
     referer = request.headers.get("referer")
-    expected_origin = f"{request.url.scheme}://{request.headers.get('host', '')}"
+    forwarded_host = request.headers.get("x-forwarded-host")
+    host = forwarded_host.split(",", maxsplit=1)[0].strip() if forwarded_host else request.headers.get("host", "")
+    expected_origin = get_expected_origin(
+        host=host,
+        scheme=request.url.scheme,
+        forwarded_proto=request.headers.get("x-forwarded-proto"),
+    )
 
     if origin:
         if origin != expected_origin:

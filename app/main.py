@@ -14,7 +14,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from app.config import get_settings
 from app.database import Base, SessionLocal, engine, get_db
 from app.models import Message, User
-from app.security import create_user_session, delete_session, get_session_user, require_same_origin, verify_password
+from app.security import create_user_session, delete_session, get_expected_origin, get_session_user, require_same_origin, verify_password
 from app.websocket_manager import manager
 
 
@@ -93,18 +93,6 @@ def build_page_state(user: User | None, messages: list[Message]) -> dict:
 def get_current_user(request: Request, db: Session = Depends(get_db)) -> User | None:
     session_id = request.cookies.get(settings.session_cookie_name)
     return get_session_user(db, session_id)
-
-
-def get_expected_origin(host: str, scheme: str, forwarded_proto: str | None = None) -> str:
-    if forwarded_proto:
-        normalized_scheme = forwarded_proto.split(",", maxsplit=1)[0].strip()
-    elif scheme == "wss":
-        normalized_scheme = "https"
-    elif scheme == "ws":
-        normalized_scheme = "http"
-    else:
-        normalized_scheme = scheme
-    return f"{normalized_scheme}://{host}"
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -219,8 +207,10 @@ async def delete_message(
 @app.websocket("/ws/chat")
 async def chat_socket(websocket: WebSocket):
     origin = websocket.headers.get("origin")
+    forwarded_host = websocket.headers.get("x-forwarded-host")
+    host = forwarded_host.split(",", maxsplit=1)[0].strip() if forwarded_host else websocket.headers.get("host", "")
     expected_origin = get_expected_origin(
-        host=websocket.headers.get("host", ""),
+        host=host,
         scheme=websocket.url.scheme,
         forwarded_proto=websocket.headers.get("x-forwarded-proto"),
     )
