@@ -1,0 +1,283 @@
+/* ==========================================================================
+   MURZIN NIKITA — MINIMALIST EDITORIAL PORTFOLIO
+   Clean #FFFFFF background, crisp black typography, big screenshots.
+   ========================================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background-color: #ffffff;
+  color: #000000;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: #ffffff;
+  color: #000000;
+  padding: 60px 24px 100px;
+}
+
+.page-container {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+/* Typography & Links */
+a {
+  color: #000000;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  opacity: 0.7;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 56px 0;
+}
+
+/* Intro */
+.intro-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.name {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 2px;
+}
+
+.role {
+  font-size: 18px;
+  color: #555555;
+  margin-top: -8px;
+  margin-bottom: 4px;
+}
+
+.contacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+}
+
+/* Skills */
+.skills-block {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f3f4f6;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skills-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: #888888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.skills-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: #222222;
+}
+
+.skills-list li {
+  position: relative;
+  padding-left: 16px;
+}
+
+.skills-list li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: #888888;
+}
+
+/* Case Studies */
+.case-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.case-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.case-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: #888888;
+}
+
+.case-title {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.case-link {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+}
+
+.case-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  background-color: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: #444444;
+}
+
+.case-body {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.facts-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 15px;
+  max-width: 860px;
+}
+
+.facts-list li {
+  position: relative;
+  padding-left: 18px;
+  line-height: 1.6;
+}
+
+.facts-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #000000;
+}
+
+.facts-list strong {
+  font-weight: 600;
+}
+
+/* Case Images */
+.case-images {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+.grid-images {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.image-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.image-box.full-width {
+  grid-column: 1 / -1;
+}
+
+.image-box img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  background-color: #fafafa;
+}
+
+.caption {
+  font-size: 12px;
+  color: #777777;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Footer */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #666666;
+  font-family: 'JetBrains Mono', monospace;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  body {
+    padding: 40px 16px 60px;
+  }
+
+  .grid-images {
+    grid-template-columns: 1fr;
+  }
+
+  .divider {
+    margin: 44px 0;
+  }
+
+  .name {
+    font-size: 26px;
+  }
+
+  .case-title {
+    font-size: 22px;
+  }
+
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Clean Print / PDF Mode */
+@media print {
+  body {
+    padding: 0;
+  }
+  
+  .case-section {
+    page-break-inside: avoid;
+  }
+
+  .divider {
+    margin: 32px 0;
+  }
+}
