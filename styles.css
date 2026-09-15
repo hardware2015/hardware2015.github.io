@@ -1,6 +1,6 @@
 /* ==========================================================================
    MURZIN NIKITA — MINIMALIST EDITORIAL PORTFOLIO
-   Clean #FFFFFF background, crisp black typography, big screenshots.
+   Clean #FFFFFF background, crisp typography, responsive layout.
    ========================================================================== */
 
 *, *::before, *::after {
@@ -75,6 +75,65 @@ a:hover {
   font-size: 14px;
 }
 
+/* Action Buttons */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 9px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-primary {
+  background-color: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+}
+
+.btn-primary:hover {
+  background-color: #222222;
+  color: #ffffff;
+  opacity: 1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.btn-secondary {
+  background-color: #f3f4f6;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+}
+
+.btn-secondary:hover {
+  background-color: #e5e7eb;
+  border-color: #d1d5db;
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 12px;
+  gap: 6px;
+}
+
 /* Skills */
 .skills-block {
   margin-top: 16px;
@@ -82,7 +141,7 @@ a:hover {
   border-top: 1px solid #f3f4f6;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .skills-label {
@@ -96,9 +155,10 @@ a:hover {
 
 .skills-list {
   list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 36px;
+  row-gap: 8px;
   font-size: 14px;
   color: #222222;
 }
@@ -106,6 +166,7 @@ a:hover {
 .skills-list li {
   position: relative;
   padding-left: 16px;
+  line-height: 1.45;
 }
 
 .skills-list li::before {
@@ -217,14 +278,196 @@ a:hover {
   height: auto;
   display: block;
   border: 1px solid #e5e7eb;
-  border-radius: 4px;
+  border-radius: 6px;
   background-color: #fafafa;
+  cursor: zoom-in;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.image-box img:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.08);
 }
 
 .caption {
   font-size: 12px;
   color: #777777;
   font-family: 'JetBrains Mono', monospace;
+}
+
+/* Lightbox & Modals */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.modal.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.modal-wrapper {
+  position: relative;
+  z-index: 10000;
+  max-width: 94vw;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: scale(0.96);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal.is-active .modal-wrapper {
+  transform: scale(1);
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-content img {
+  max-width: 90vw;
+  max-height: 80vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.5);
+  background-color: #111111;
+}
+
+.modal-caption {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: #f3f4f6;
+  text-align: center;
+  max-width: 800px;
+  line-height: 1.4;
+  padding: 4px 12px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 4px;
+}
+
+.modal-close {
+  position: absolute;
+  top: -44px;
+  right: 0;
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  opacity: 0.8;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.modal-close:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Dedicated CV Modal — Floating white bar above the image */
+.cv-modal-wrapper {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+  max-width: 95vw;
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.cv-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  gap: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.cv-modal-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.cv-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-close-btn {
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #374151;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.modal-close-btn:hover {
+  background-color: #f3f4f6;
+  color: #000000;
+  border-color: #cbd5e1;
+}
+
+.cv-modal-body {
+  overflow: hidden;
+  padding: 0;
+  background: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cv-image {
+  max-height: calc(88vh - 65px);
+  max-width: 92vw;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  border-radius: 6px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
 }
 
 /* Footer */
@@ -239,31 +482,119 @@ a:hover {
   gap: 12px;
 }
 
-/* Responsive */
+.footer-alt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Responsive / Mobile Optimization */
 @media (max-width: 768px) {
   body {
-    padding: 40px 16px 60px;
+    padding: 32px 16px 56px;
+  }
+
+  .header-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .skills-list {
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
 
   .grid-images {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .divider {
-    margin: 44px 0;
+    margin: 36px 0;
   }
 
   .name {
     font-size: 26px;
   }
 
+  .role {
+    font-size: 16px;
+  }
+
+  .contacts {
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+  }
+
+  .case-meta {
+    gap: 8px;
+  }
+
   .case-title {
     font-size: 22px;
+  }
+
+  .case-body {
+    gap: 18px;
+  }
+
+  .facts-list {
+    font-size: 14px;
+    gap: 8px;
+  }
+
+  .modal {
+    padding: 12px;
+  }
+
+  .modal-close {
+    top: -38px;
+    font-size: 28px;
+  }
+
+  .modal-content img {
+    max-width: 95vw;
+    max-height: 72vh;
+  }
+
+  .modal-caption {
+    font-size: 12px;
+  }
+
+  .cv-modal-header {
+    width: 100%;
+    padding: 8px 12px;
+  }
+
+  .cv-modal-title {
+    font-size: 11px;
+  }
+
+  .cv-image {
+    max-height: calc(88vh - 60px);
+    max-width: 95vw;
   }
 
   .footer {
     flex-direction: column;
     align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-actions {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -279,5 +610,9 @@ a:hover {
 
   .divider {
     margin: 32px 0;
+  }
+
+  .modal {
+    display: none !important;
   }
 }
