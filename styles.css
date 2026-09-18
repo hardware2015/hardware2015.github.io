@@ -1,5 +1,5 @@
 /* ==========================================================================
-   MURZIN NIKITA — MINIMALIST EDITORIAL PORTFOLIO
+   NICHOLAS MURZIN — MINIMALIST EDITORIAL PORTFOLIO
    Clean #FFFFFF background, crisp typography, responsive layout.
    ========================================================================== */
 
@@ -22,11 +22,43 @@ body {
   background-color: #ffffff;
   color: #000000;
   padding: 60px 24px 100px;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Background Pattern & Dynamic Cursor Spotlight */
+.bg-pattern,
+.bg-pattern-spotlight,
+.bg-pattern-glow {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bg-pattern {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.bg-pattern-spotlight {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.32) 1.25px, transparent 1.25px);
+  background-size: 24px 24px;
+  -webkit-mask-image: radial-gradient(340px circle at var(--cursor-x, -999px) var(--cursor-y, -999px), black 0%, rgba(0, 0, 0, 0.5) 45%, transparent 100%);
+  mask-image: radial-gradient(340px circle at var(--cursor-x, -999px) var(--cursor-y, -999px), black 0%, rgba(0, 0, 0, 0.5) 45%, transparent 100%);
+}
+
+.bg-pattern-glow {
+  background: radial-gradient(380px circle at var(--cursor-x, -999px) var(--cursor-y, -999px), rgba(0, 0, 0, 0.02) 0%, transparent 80%);
 }
 
 .page-container {
   max-width: 1040px;
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
 }
 
 /* Typography & Links */
@@ -612,7 +644,10 @@ a:hover {
     margin: 32px 0;
   }
 
-  .modal {
+  .modal,
+  .bg-pattern,
+  .bg-pattern-spotlight,
+  .bg-pattern-glow {
     display: none !important;
   }
 }

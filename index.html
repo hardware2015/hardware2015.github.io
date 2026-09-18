@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Murzin Nikita — Portfolio</title>
+  <title>Nicholas Murzin — Portfolio</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,11 +13,16 @@
 </head>
 <body>
 
+  <!-- Interactive Background Pattern & Spotlight -->
+  <div class="bg-pattern" aria-hidden="true"></div>
+  <div class="bg-pattern-spotlight" aria-hidden="true"></div>
+  <div class="bg-pattern-glow" aria-hidden="true"></div>
+
   <main class="page-container">
 
     <!-- Top Info -->
     <section class="intro-section">
-      <h1 class="name">Murzin Nikita</h1>
+      <h1 class="name">Nicholas Murzin</h1>
       <p class="role">Product Builder & AI-Driven Developer</p>
       
       <div class="contacts">
@@ -31,7 +36,7 @@
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
           <span>View Resume (CV)</span>
         </button>
-        <a href="assets/MurzinNikitaCV.pdf" download="Murzin_Nikita_CV.pdf" class="btn btn-secondary">
+        <a href="assets/MurzinNikitaCV.pdf" download="Nicholas_Murzin_CV.pdf" class="btn btn-secondary">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
           <span>Download PDF</span>
         </a>
@@ -189,9 +194,9 @@
 
     <!-- Simple Footer -->
     <footer class="footer">
-      <div>Murzin Nikita — <a href="mailto:nktamurzin@gmail.com">nktamurzin@gmail.com</a></div>
+      <div>Nicholas Murzin — <a href="mailto:nktamurzin@gmail.com">nktamurzin@gmail.com</a></div>
       <div class="footer-alt">
-        <a href="assets/MurzinNikitaCV.pdf" download="Murzin_Nikita_CV.pdf">Download Resume [PDF]</a> · <span>skandxindustries@gmail.com</span>
+        <a href="assets/MurzinNikitaCV.pdf" download="Nicholas_Murzin_CV.pdf">Download Resume [PDF]</a> · <span>skandxindustries@gmail.com</span>
       </div>
     </footer>
 
@@ -202,9 +207,9 @@
     <div class="modal-backdrop" data-close="true"></div>
     <div class="modal-wrapper cv-modal-wrapper">
       <div class="cv-modal-header">
-        <span class="cv-modal-title">Nikita Murzin — Resume (CV)</span>
+        <span class="cv-modal-title">Nicholas Murzin — Resume (CV)</span>
         <div class="cv-modal-actions">
-          <a href="assets/MurzinNikitaCV.pdf" download="Murzin_Nikita_CV.pdf" class="btn btn-primary btn-sm">
+          <a href="assets/MurzinNikitaCV.pdf" download="Nicholas_Murzin_CV.pdf" class="btn btn-primary btn-sm">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             <span>Download PDF</span>
           </a>
@@ -212,7 +217,7 @@
         </div>
       </div>
       <div class="cv-modal-body">
-        <img src="assets/CV.png" alt="Nikita Murzin CV / Resume" class="cv-image">
+        <img src="assets/CV.png" alt="Nicholas Murzin CV / Resume" class="cv-image">
       </div>
     </div>
   </div>
@@ -297,6 +302,59 @@
           document.querySelectorAll('.modal.is-active').forEach(m => closeModal(m));
         }
       });
+
+      // Interactive background pattern spotlight tracking cursor
+      let mouseX = -999;
+      let mouseY = -999;
+      let currentX = -999;
+      let currentY = -999;
+      let isMoving = false;
+
+      window.addEventListener('pointermove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        if (!isMoving) {
+          isMoving = true;
+          requestAnimationFrame(updateCursorSpotlight);
+        }
+      }, { passive: true });
+
+      window.addEventListener('pointerleave', () => {
+        mouseX = -999;
+        mouseY = -999;
+      });
+
+      function updateCursorSpotlight() {
+        if (mouseX === -999) {
+          currentX = -999;
+          currentY = -999;
+          document.documentElement.style.setProperty('--cursor-x', '-999px');
+          document.documentElement.style.setProperty('--cursor-y', '-999px');
+          isMoving = false;
+          return;
+        }
+
+        if (currentX === -999) {
+          currentX = mouseX;
+          currentY = mouseY;
+        } else {
+          currentX += (mouseX - currentX) * 0.35;
+          currentY += (mouseY - currentY) * 0.35;
+        }
+
+        document.documentElement.style.setProperty('--cursor-x', `${currentX.toFixed(1)}px`);
+        document.documentElement.style.setProperty('--cursor-y', `${currentY.toFixed(1)}px`);
+
+        if (Math.abs(mouseX - currentX) > 0.2 || Math.abs(mouseY - currentY) > 0.2) {
+          requestAnimationFrame(updateCursorSpotlight);
+        } else {
+          currentX = mouseX;
+          currentY = mouseY;
+          document.documentElement.style.setProperty('--cursor-x', `${currentX.toFixed(1)}px`);
+          document.documentElement.style.setProperty('--cursor-y', `${currentY.toFixed(1)}px`);
+          isMoving = false;
+        }
+      }
     })();
   </script>
 
